@@ -1,2 +1,5 @@
-# All-Fours
-# All-Fours
+### All-Fours Repo
+
+Storage for all the files needed for the game.
+
+-Varaun
