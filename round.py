@@ -36,6 +36,7 @@ class Round():
             lift.start_lift()
             lift = Lift(lift.find_winner(), self)
             
+            
 
 
 #---------------------------------------------------------------------
@@ -67,37 +68,54 @@ class Lift():
                 card_index = (int(input(player.name + ": Please select a card from 1 to " + str(len(player.cards)) + " ")) - 1)
         print("[" + player.name + "] played ", end="")
         player.cards[card_index].print_card()
-        self.cards_in_lift.append(player.cards.pop(card_index))
+        self.cards_in_lift.append((player,player.cards.pop(card_index)))
 
     def find_winner(self):
-        card_values = []
-        for card in self.cards_in_lift:
-            card_values.append(card.value)
-        highest_card_index = card_values.index(max(card_values))
+        trumpquestion = False
+        for pair in self.cards_in_lift:
+            if pair[1].suit == self.trump_suit:
+                trumpquestion = True
+                break
+        if (trumpquestion):
+            trump_played = []
+            for pair in self.cards_in_lift:
+                if pair[1].suit == self.trump_suit:
+                    trump_played.append((pair[0], pair[1].value))
+                else:
+                    trump_played.append((pair[0], 0))
+        else:
+            trump_played = []
+            suit_played = self.cards_in_lift[0][1].suit
+            for pair in self.cards_in_lift:
+                if pair[1].suit == suit_played:
+                    trump_played.append((pair[0], pair[1].value))
+                else:
+                    trump_played.append((pair[0], 0))
+        highest_card_index = trump_played.index(max(trump_played, key=lambda tuple: tuple[1]))
         print()
-        print("[" + game_players[(self.first_to_act_index + highest_card_index) % len(game_players)].name + "]" + " is the winner!")
-        return game_players[(self.first_to_act_index + highest_card_index) % len(game_players)]
-
+        print("[" + trump_played[highest_card_index][0].name + "]" + " is the winner!") 
+        return trump_played[highest_card_index][0]   
+        
 
     # this function is false if there is no undertrump and true if there is
     def check_undertrump(self, card):
         check = False
         length = len(self.cards_in_lift)
         if (length == 2):
-            if (self.cards_in_lift[1].suit == self.trump_suit):
-                if (card.value < self.cards_in_lift[1].value):
+            if (self.cards_in_lift[1][1].suit == self.trump_suit):
+                if (card.value < self.cards_in_lift[1][1].value):
                     check = True
         if (length == 3):
-            if (self.cards_in_lift[1].suit == self.trump_suit and self.cards_in_lift[2].suit == self.trump_suit):
-                max_value = max(self.cards_in_lift[1].value, self.cards_in_lift[2].value)
+            if (self.cards_in_lift[1][1].suit == self.trump_suit and self.cards_in_lift[2][1].suit == self.trump_suit):
+                max_value = max(self.cards_in_lift[1][1].value, self.cards_in_lift[2][1].value)
                 if (card.value < max_value):
                     check = True
-            if (self.cards_in_lift[1].suit == self.trump_suit and self.cards_in_lift[2].suit != self.trump_suit):
-                if (card.value < self.cards_in_lift[1].value):
-                    check = True
-            if (self.cards_in_lift[2] == self.trump_suit and self.cards_in_lift[1].suit != self.trump_suit):
-                if (card.value < self.cards_in_lift[2].value):
-                    check = True
+        if (self.cards_in_lift[1][1].suit == self.trump_suit and self.cards_in_lift[2][1].suit != self.trump_suit):
+            if (card.value < self.cards_in_lift[1][1].value):
+                check = True
+        if (self.cards_in_lift[2][1].suit == self.trump_suit and self.cards_in_lift[1][1].suit != self.trump_suit):
+            if (card.value < self.cards_in_lift[2][1].value):
+                check = True
         return check              
 
     # this function will return error codes based on the play of the card
@@ -108,7 +126,7 @@ class Lift():
         if (len(self.cards_in_lift) == 0):
             return 0
         else:
-            if (card.suit == self.cards_in_lift[0].suit):
+            if (card.suit == self.cards_in_lift[0][1].suit):
                 return 0
             else:
                 if (card.suit == self.trump_suit):
@@ -120,7 +138,7 @@ class Lift():
                         else:
                             return 0
                 else:
-                    if (player.check_cards(self.cards_in_lift[0].suit) == True):
+                    if (player.check_cards(self.cards_in_lift[0][1].suit) == True):
                         return 1
                     else:
                         return 0
@@ -133,3 +151,5 @@ class Lift():
             self.player_play(game_players[(self.first_to_act_index + i) % len(game_players)])
             i += 1
 
+    def add_card(self, player, card):
+        self.cards_in_lift.append((player, card))
