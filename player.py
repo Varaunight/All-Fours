@@ -38,9 +38,7 @@ class Player():
                 break
         return check
 
-
 null_player = Player("Null")
-
 #---------------------------------------------------------------------
 
 game_teams = []
@@ -64,5 +62,11 @@ class Team():
             team.players[1] = player
             player.team_id = team.team_id
             game_players.append(player)
+        
+        team.name = team.name = (team.players[0].name + " and " + team.players[1].name)
+
+    def print_team(self):
+        print(self.name, end=" ")
+        print(": " + str(self.score) + " points!")
 
 #---------------------------------------------------------------------
