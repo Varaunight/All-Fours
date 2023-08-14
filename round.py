@@ -48,6 +48,7 @@ class Round():
 
     def start_round(self):
         self.kick_card()
+        # Change number of cards for dealing if you want 
         self.deal_players(3)
         lift = Lift(game_players[0], self)
         while (len(game_players[0].cards) != 0):
